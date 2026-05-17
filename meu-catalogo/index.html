@@ -1,477 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Big Lanche - Catálogo Dinâmico</title>
-  <meta name="theme-color" content="#0b0f17">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-
+  <title>Big Lanche - Catálogo</title>
   <style>
-    :root {
-      --bg: #0b0f17;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: rgba(255, 255, 255, .08);
-      --accent: #22c55e;
-      --danger: #ef4444;
-      --edit: #2563eb;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-
-    .container {
-      width: min(1100px, 92vw);
-      margin: auto;
-    }
-
-    /* TOPO */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 999;
-      background: rgba(11, 15, 23, .92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .topbar__inner {
-      padding: 14px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      margin: 0;
-      font-size: 20px;
-    }
-
-    .adminBtn {
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    /* MENU */
-    .menu {
-      margin-top: 20px;
-    }
-
-    .menu__row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .menu__btn {
-      border: 1px solid var(--border);
-      background: transparent;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .menu__btn.active {
-      background: rgba(34, 197, 94, .15);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* SEARCH */
-    .search {
-      margin: 18px 0;
-    }
-
-    #searchInput {
-      width: 100%;
-      padding: 13px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #111827;
-      color: white;
-      outline: none;
-    }
-
-    /* CONTAINER AGRUPADO */
-    .categoryBlock {
-      margin-bottom: 40px;
-    }
-
-    .categoryHeading {
-      font-size: 24px;
-      margin: 0 0 18px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-      color: #fff;
-    }
-
-    .productsGrid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 14px;
-    }
-
-    /* CARD */
-    .card {
-      overflow: hidden;
-      border-radius: 18px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .productImage {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      display: block;
-      cursor: zoom-in;
-      background: #1f2937;
-    }
-
-    .card__body {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
-
-    .card__title {
-      margin: 0 0 10px;
-      font-size: 18px;
-    }
-
-    .card__meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-      margin-bottom: 14px;
-      color: var(--muted);
-    }
-
-    .buyBtn {
-      width: 100%;
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* MODAL */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal__content {
-      width: min(720px, 92vw);
-      max-height: 90vh;
-      overflow: auto;
-      background: #111827;
-      border-radius: 20px;
-      padding: 20px;
-      border: 1px solid var(--border);
-    }
-
-    .modal__title {
-      margin-top: 0;
-    }
-
-    /* FORM */
-    .formGroup {
-      margin-bottom: 14px;
-    }
-
-    .formGroup label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-    }
-
-    .formGroup input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #0f172a;
-      color: white;
-    }
-
-    .saveBtn {
-      width: 100%;
-      border: none;
-      background: var(--accent);
-      color: white;
-      padding: 13px;
-      border-radius: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .closeBtn {
-      width: 100%;
-      border: none;
-      background: #374151;
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    /* ADMIN LIST */
-    .adminList {
-      margin-top: 24px;
-    }
-
-    .adminItem {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      background: #0f172a;
-      padding: 14px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-    }
-
-    .adminItem img {
-      width: 90px;
-      height: 90px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #1f2937;
-    }
-
-    .adminItem__info {
-      flex: 1;
-    }
-
-    .adminActions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .editBtn {
-      border: none;
-      background: var(--edit);
-      color: white;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .dangerBtn {
-      border: none;
-      background: var(--danger);
-      color: white;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 30px;
-    }
-
-    /* PREVIEW IMAGEM */
-    .imagePreviewModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .95);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999999;
-      padding: 20px;
-    }
-
-    .imagePreviewModal.active {
-      display: flex;
-    }
-
-    .imagePreviewModal img {
-      max-width: 95%;
-      max-height: 95vh;
-      object-fit: contain;
-      border-radius: 12px;
-    }
-
-    .closePreviewBtn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 44px;
-      height: 44px;
-      border: none;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .15);
-      color: white;
-      font-size: 22px;
-      cursor: pointer;
-    }
-
-    /* MOBILE */
-    @media(max-width:600px) {
-      .productsGrid {
-        grid-template-columns: 1fr;
-      }
-
-      .adminItem {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .adminItem img {
-        width: 100%;
-        height: 180px;
-      }
-    }
+    /* Cole AQUI todo o seu CSS que começa em :root { ... } e vai até o final da tag <style> */
   </style>
 </head>
-
 <body>
+  <script>
+    const ADMIN_PASSWORD = "192192";
+    const WHATSAPP_NUMBER = "5531999999999";
+    let products = [];
 
-  <header class="topbar">
-    <div class="container topbar__inner">
-      <h1 class="brand">Big Lanche</h1>
-      <button class="adminBtn" id="openAdminBtn">Admin</button>
-    </div>
-  </header>
+    // Busca os lanches gravados no Postgres da Vercel
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products');
+        products = await res.json();
+        renderMenu();
+        renderGrid();
+      } catch (e) { console.error("Erro ao carregar banco", e); }
+    }
 
-  <main class="container">
-    <section class="menu">
-      <div class="menu__row" id="menuRow"></div>
-    </section>
+    // Salva o lanche usando a API da Vercel (Foto no Blob + Dados no Postgres)
+    document.getElementById("saveProductBtn").onclick = async () => {
+      const title = document.getElementById("productTitle").value;
+      const category = document.getElementById("productCategory").value;
+      const price = document.getElementById("productPrice").value;
+      const file = document.getElementById("productImage").files[0];
 
-    <section class="search">
-      <input type="text" id="searchInput" placeholder="Buscar produto..." />
-    </section>
+      if(!title || !file) return alert("Preencha o nome e escolha uma foto!");
 
-    <section id="catalogContainer"></section>
+      const btn = document.getElementById("saveProductBtn");
+      btn.disabled = true; btn.textContent = "Salvando...";
 
-    <p class="empty" id="emptyState" hidden>Nenhum produto encontrado.</p>
-  </main>
+      try {
+        // 1. Envia a foto
+        const upload = await fetch('/api/upload', { method: 'POST', body: file });
+        const blob = await upload.json();
 
-  <div class="modal" id="loginModal">
-    <div class="modal__content">
-      <h2 class="modal__title">Login Admin</h2>
-      <div class="formGroup">
-        <label>Senha</label>
-        <input type="password" id="adminPassword" placeholder="Digite a senha" />
-      </div>
-      <button class="saveBtn" id="loginBtn">Entrar</button>
-      <button class="closeBtn" id="closeLoginBtn">Fechar</button>
-    </div>
-  </div>
-
-  <div class="modal" id="adminModal">
-    <div class="modal__content">
-      <h2 class="modal__title">Painel Administrativo</h2>
-      <div class="formGroup">
-        <label>Nome Produto</label>
-        <input type="text" id="productTitle" />
-      </div>
-      <div class="formGroup">
-        <label>Categoria (Pasta no Banco de Dados)</label>
-        <input type="text" id="productCategory" placeholder="Ex: Lanches, Bebidas, Porcoes" />
-      </div>
-      <div class="formGroup">
-        <label>Preço</label>
-        <input type="number" id="productPrice" step="0.01" />
-      </div>
-      <div class="formGroup">
-        <label>Imagem</label>
-        <input type="file" id="productImage" accept="image/*" />
-      </div>
-      <button class="saveBtn" id="saveProductBtn">Salvar Produto</button>
-      <div class="adminList" id="adminList"></div>
-      <button class="closeBtn" id="closeAdminBtn">Fechar</button>
-    </div>
-  </div>
-
-  <div class="imagePreviewModal" id="imagePreviewModal">
-    <button class="closePreviewBtn" id="closePreviewBtn">✕</button>
-    <img id="previewImage" src="" alt="Preview" />
-  </div>
-let products = [];
-let activeCategory = "Todos";
-
-// Função que busca os lanches no banco da Vercel quando o site abre
-async function carregarLanches() {
-    const resposta = await fetch('/api/products');
-    products = await resposta.json();
-    renderizarMenu();
-    renderizarProdutos();
-}
-
-// Função para salvar um lanche novo
-document.getElementById("saveProductBtn").onclick = async () => {
-    const nome = document.getElementById("productTitle").value;
-    const categoria = document.getElementById("productCategory").value;
-    const preco = document.getElementById("productPrice").value;
-    const arquivoFoto = document.getElementById("productImage").files[0];
-
-    if (!nome || !categoria || !preco || !arquivoFoto) return alert("Preencha tudo!");
-
-    // 1. Envia a foto para a nuvem
-    const upload = await fetch('/api/upload', { method: 'POST', body: arquivoFoto });
-    const resultadoFoto = await upload.json();
-
-    // 2. Salva as informações no banco de dados
-    await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        // 2. Salva os textos
+        await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             id: crypto.randomUUID(),
-            title: nome,
-            category: categoria,
-            price: parseFloat(preco),
-            image_url: resultadoFoto.url
-        })
-    });
+            title, category, price: parseFloat(price), image_url: blob.url
+          })
+        });
 
-    alert("Lanche salvo!");
-    location.reload(); 
-};
+        alert("Sucesso!");
+        location.reload();
+      } catch (err) { alert("Erro ao salvar!"); }
+    };
 
-// ... (Aqui você mantém suas funções de renderizarMenu e renderizarProdutos que já funcionam no seu CSS)
-carregarLanches();
-  
+    // Cole AQUI suas funções originais: renderMenu, renderGrid, buyProduct, etc.
+    // IMPORTANTE: No renderGrid, mude a imagem para: src="${product.image_url}"
+
+    loadProducts(); // Inicia o site buscando os dados
+  </script>
 </body>
 </html>
