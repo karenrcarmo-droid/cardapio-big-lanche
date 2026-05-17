@@ -3,63 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Big Lanche - Catálogo</title>
+  <title>Big Lanche - Vercel</title>
   <style>
-    /* Cole AQUI todo o seu CSS que começa em :root { ... } e vai até o final da tag <style> */
+    /* O SEU CSS ORIGINAL */
+    :root { --bg: #0b0f17; --card: #111827; --text: #e5e7eb; --muted: #9ca3af; --border: rgba(255, 255, 255, .08); --accent: #22c55e; --danger: #ef4444; --edit: #2563eb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+    .container { width: min(1100px, 92vw); margin: auto; }
+    .topbar { position: sticky; top: 0; z-index: 999; background: rgba(11, 15, 23, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    .topbar__inner { padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+    .brand { margin: 0; font-size: 20px; }
+    .adminBtn { border: none; background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .menu__row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    .menu__btn { border: 1px solid var(--border); background: transparent; color: white; padding: 10px 14px; border-radius: 999px; cursor: pointer; }
+    .menu__btn.active { background: rgba(34, 197, 94, .15); border-color: var(--accent); color: var(--accent); }
+    #searchInput { width: 100%; padding: 13px; border-radius: 12px; border: 1px solid var(--border); background: #111827; color: white; margin: 18px 0; }
+    .categoryBlock { margin-bottom: 40px; }
+    .categoryHeading { font-size: 24px; margin-bottom: 18px; border-bottom: 1px solid var(--border); color: #fff; }
+    .productsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    .card { border-radius: 18px; background: var(--card); border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
+    .productImage { width: 100%; height: 220px; object-fit: cover; cursor: zoom-in; }
+    .card__body { padding: 14px; flex-grow: 1; }
+    .buyBtn { width: 100%; border: none; background: var(--accent); color: white; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); display: none; justify-content: center; align-items: center; z-index: 9999; }
+    .modal.active { display: flex; }
+    .modal__content { width: min(720px, 92vw); background: #111827; border-radius: 20px; padding: 20px; }
+    .formGroup { margin-bottom: 14px; }
+    .formGroup input { width: 100%; padding: 12px; border-radius: 10px; background: #0f172a; color: white; border: 1px solid var(--border); }
   </style>
 </head>
 <body>
+
+  <header class="topbar"><div class="container topbar__inner"><h1 class="brand">Big Lanche</h1><button class="adminBtn" id="openAdminBtn">Admin</button></div></header>
+  <main class="container">
+    <div class="menu__row" id="menuRow"></div>
+    <input type="text" id="searchInput" placeholder="Buscar produto..." />
+    <section id="catalogContainer"></section>
+  </main>
+
+  <div class="modal" id="loginModal"><div class="modal__content"><h2>Login Admin</h2><input type="password" id="adminPassword" style="width:100%;padding:10px;" /><br><br><button class="adminBtn" id="loginBtn">Entrar</button></div></div>
+  <div class="modal" id="adminModal">
+    <div class="modal__content">
+      <h2>Painel</h2>
+      <div class="formGroup"><label>Nome</label><input type="text" id="productTitle" /></div>
+      <div class="formGroup"><label>Categoria</label><input type="text" id="productCategory" /></div>
+      <div class="formGroup"><label>Preço</label><input type="number" id="productPrice" step="0.01" /></div>
+      <div class="formGroup"><label>Foto</label><input type="file" id="productImage" accept="image/*" /></div>
+      <button class="adminBtn" id="saveProductBtn" style="width:100%">Salvar</button>
+      <button onclick="location.reload()" style="width:100%;margin-top:10px">Fechar</button>
+    </div>
+  </div>
+
   <script>
     const ADMIN_PASSWORD = "192192";
-    const WHATSAPP_NUMBER = "5531999999999";
     let products = [];
+    let activeCategory = "Todos";
 
-    // Busca os lanches gravados no Postgres da Vercel
-    async function loadProducts() {
-      try {
-        const res = await fetch('/api/products');
-        products = await res.json();
-        renderMenu();
-        renderGrid();
-      } catch (e) { console.error("Erro ao carregar banco", e); }
+    // 1. CARREGAR DO BANCO VERCEL
+    async function loadFromVercel() {
+      const res = await fetch('/api/products');
+      products = await res.json();
+      renderMenu();
+      renderGrid();
     }
 
-    // Salva o lanche usando a API da Vercel (Foto no Blob + Dados no Postgres)
+    // 2. SALVAR NO BANCO VERCEL
     document.getElementById("saveProductBtn").onclick = async () => {
       const title = document.getElementById("productTitle").value;
       const category = document.getElementById("productCategory").value;
       const price = document.getElementById("productPrice").value;
       const file = document.getElementById("productImage").files[0];
 
-      if(!title || !file) return alert("Preencha o nome e escolha uma foto!");
+      if(!file || !title) return alert("Preencha os dados!");
 
-      const btn = document.getElementById("saveProductBtn");
-      btn.disabled = true; btn.textContent = "Salvando...";
+      // Envia a foto para o Blob
+      const upload = await fetch('/api/upload', { method: 'POST', body: file });
+      const resultadoFoto = await upload.json();
 
-      try {
-        // 1. Envia a foto
-        const upload = await fetch('/api/upload', { method: 'POST', body: file });
-        const blob = await upload.json();
+      // Envia os textos para o Postgres
+      await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: crypto.randomUUID(),
+          title, category, price: parseFloat(price), image_url: resultadoFoto.url
+        })
+      });
 
-        // 2. Salva os textos
-        await fetch('/api/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: crypto.randomUUID(),
-            title, category, price: parseFloat(price), image_url: blob.url
-          })
-        });
-
-        alert("Sucesso!");
-        location.reload();
-      } catch (err) { alert("Erro ao salvar!"); }
+      alert("Salvo com sucesso!");
+      location.reload();
     };
 
-    // Cole AQUI suas funções originais: renderMenu, renderGrid, buyProduct, etc.
-    // IMPORTANTE: No renderGrid, mude a imagem para: src="${product.image_url}"
+    function renderMenu() {
+      const menu = document.getElementById("menuRow");
+      const cats = ["Todos", ...new Set(products.map(p => p.category))];
+      menu.innerHTML = cats.map(c => `<button class="menu__btn ${activeCategory === c ? 'active' : ''}" onclick="activeCategory='${c}';renderMenu();renderGrid();">${c}</button>`).join('');
+    }
 
-    loadProducts(); // Inicia o site buscando os dados
+    function renderGrid() {
+      const container = document.getElementById("catalogContainer");
+      const filtered = products.filter(p => activeCategory === "Todos" || p.category === activeCategory);
+      container.innerHTML = filtered.map(p => `
+        <div class="card">
+          <img src="${p.image_url}" class="productImage">
+          <div class="card__body">
+            <h3>${p.title}</h3>
+            <p>R$ ${p.price}</p>
+            <button class="buyBtn" onclick="window.open('https://wa.me/5531999999999?text=Quero+${p.title}')">Pedir no Whats</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById("openAdminBtn").onclick = () => document.getElementById("loginModal").classList.add("active");
+    document.getElementById("loginBtn").onclick = () => {
+      if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
+        document.getElementById("loginModal").classList.remove("active");
+        document.getElementById("adminModal").classList.add("active");
+      }
+    };
+
+    loadFromVercel();
   </script>
 </body>
 </html>
